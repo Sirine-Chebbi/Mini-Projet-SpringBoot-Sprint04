@@ -1,22 +1,11 @@
 package com.sirine.series.entities;
 import java.util.Date;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
-
-
 
 @Entity
 public class Serie {
@@ -25,17 +14,10 @@ public class Serie {
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Long idSerie;
 	
-	@NotNull
-	@Size (min = 2,max = 50)
+
 	private String nomSerie;
-	
-	@Min(value = (long) 1.0)
-	@Max(value = (long) 10.0)
+
 	private Double nbSerie;
-	
-	@Temporal(TemporalType.DATE)
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	@PastOrPresent
 	private Date dateSortie;
 
 	@ManyToOne

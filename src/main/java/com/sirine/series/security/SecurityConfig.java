@@ -1,81 +1,65 @@
 package com.sirine.series.security;
 
-import javax.sql.DataSource;
+import java.util.Collections;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-
 	
-	 @Bean
-	 SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {      
-		 	 http.authorizeHttpRequests((requests)->requests
-	                		.requestMatchers("/showCreate","/saveSerie").hasAnyAuthority("ADMIN","AGENT")
-	                		.requestMatchers("/ListeSeries").hasAnyAuthority("ADMIN","AGENT","USER")
-	                		.requestMatchers("/login","/webjars/**").permitAll()
-	                		.anyRequest().authenticated())
-                   	                
-	                .formLogin((formLogin) ->   formLogin
-	                		 		.loginPage("/login")
-	                		 		.defaultSuccessUrl("/") )
-	                
-	                .httpBasic(Customizer.withDefaults())
-	                .exceptionHandling((exception)-> exception.accessDeniedPage("/accessDenied"));
-	        return http.build();
-	    }
-	
-	/*@Bean
-	 public InMemoryUserDetailsManager userDetailsService() {
-		PasswordEncoder passwordEncoder = passwordEncoder ();
-
-		 UserDetails admin = User
-		 .withUsername("admin")
-		 .password(passwordEncoder.encode("123"))
-		 .authorities("ADMIN")
-		 .build();
-		 UserDetails userSirine = User
-		 .withUsername("sirine")
-		 .password(passwordEncoder.encode("123"))
-		 .authorities("AGENT","USER")
-		 .build();
-		 UserDetails user1 = User
-		 .withUsername("user1")
-		 .password(passwordEncoder.encode("123"))
-		 .authorities("USER")
-		 .build();
-
-		 return new InMemoryUserDetailsManager(admin, userSirine,user1);
-	 }*/
-
 	@Bean
-	public PasswordEncoder passwordEncoder () {
-		return new BCryptPasswordEncoder();
-	 }
+	public SecurityFilterChain filterChain (HttpSecurity http) throws Exception
+	{
+		http.sessionManagement( session -> 
+		session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+		.csrf( csrf -> csrf.disable()) 
+		
+		.cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
+            @Override
+            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                CorsConfiguration cors = new CorsConfiguration();
+                cors.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                cors.setAllowedMethods(Collections.singletonList("*"));
+                cors.setAllowedHeaders(Collections.singletonList("*"));
+                cors.setExposedHeaders(Collections.singletonList("Authorization"));
+                
+                return cors;
+            }
+        }))
+				
+	     .authorizeHttpRequests( requests -> requests
+			    		  .requestMatchers("/api/all/**").hasAnyAuthority("ADMIN","USER")
+						  .requestMatchers(HttpMethod.GET,"/api/serieGenre/**").hasAnyAuthority("ADMIN","USER")
+						  .requestMatchers(HttpMethod.GET,"/api/getbyid/**").hasAnyAuthority("ADMIN","USER")
+						  .requestMatchers(HttpMethod.POST,"/api/addserie/**").hasAnyAuthority("ADMIN")
+						  .requestMatchers(HttpMethod.PUT,"/api/updateserie/**").hasAuthority("ADMIN")
+						  .requestMatchers(HttpMethod.DELETE,"/api/delserie/**").hasAuthority("ADMIN")
+						  .requestMatchers("/g/**").hasAnyAuthority("ADMIN","USER")
+						  .requestMatchers(HttpMethod.GET,"/g/getbyid/**").hasAnyAuthority("ADMIN")
+						  .requestMatchers(HttpMethod.POST,"/g/addgenre/**").hasAnyAuthority("ADMIN")
+						  .requestMatchers(HttpMethod.PUT,"/g/updategenre/**").hasAuthority("ADMIN")
+						  .requestMatchers(HttpMethod.DELETE,"/g/delgenre/**").hasAuthority("ADMIN")
+						.anyRequest().authenticated() )
+	     
+	     .addFilterBefore(new JWTAuthorizationFilter(),
+				    UsernamePasswordAuthenticationFilter.class);
+		
+	return http.build();
+	}
 	
-	/*@Bean
-	public UserDetailsService userDetailsService(DataSource dataSource) {
-	    JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
-
-	    jdbcUserDetailsManager.setUsersByUsernameQuery("SELECT username, password, enabled FROM user WHERE username = ?");
-	    jdbcUserDetailsManager.setAuthoritiesByUsernameQuery("SELECT u.username, r.role AS authority " +
-	            "FROM user_role ur, user u, role r " +
-	            "WHERE u.user_id = ur.user_id AND ur.role_id = r.role_id AND u.username = ?");
-
-	    return jdbcUserDetailsManager;
-	}*/
 
 }

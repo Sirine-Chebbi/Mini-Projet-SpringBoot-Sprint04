@@ -21,27 +21,29 @@ public class SerieRESTController {
 	
 	@Autowired
 	SerieService serieService;
-	@RequestMapping(method = RequestMethod.GET)
-	public List<Serie> getAllProduits() {
+	
+	
+	@RequestMapping(path="all",method = RequestMethod.GET)
+	public List<Serie> getAllSeries() {
 		return serieService.getAllSeries();
 	}
 	
-	@RequestMapping(value="/{idSerie}",method = RequestMethod.GET)
+	@RequestMapping(value="/getbyid/{idSerie}",method = RequestMethod.GET)
 	public Serie getSerieById(@PathVariable("idSerie") Long id) {
 		return serieService.getSerie(id);
 	 }
 	
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(value="/addserie",method = RequestMethod.POST)
 	public Serie createSerie(@RequestBody Serie serie) {
 		return serieService.saveSerie(serie);
 	}
 	
-	@RequestMapping(method = RequestMethod.PUT)
+	@RequestMapping(value="/updateserie",method = RequestMethod.PUT)
 	public Serie updateSerie(@RequestBody Serie serie) {
 		return serieService.updateSerie(serie);
 	}
 
-	@RequestMapping(value="/{id}",method = RequestMethod.DELETE)
+	@RequestMapping(value="/delserie/{id}",method = RequestMethod.DELETE)
 	public void deleteSerie(@PathVariable("id") Long id)
 	{
 		serieService.deleteSerieById(id);

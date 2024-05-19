@@ -28,7 +28,7 @@
         Series
       </a>
       <div class="dropdown-menu">
-        <a sec:authorize="hasAnyAuthority('ADMIN','AGENT')" class="dropdown-item"  th:href="@{showCreate}">Ajouter</a>
+        <a sec:authorize="hasAnyAuthority('ADMIN','AGENT','USER')" class="dropdown-item"  th:href="@{showCreate}">Ajouter</a>
         <a class="dropdown-item"  th:href="@{ListeSeries}">Lister</a>
       </div>
     </li>
@@ -43,7 +43,6 @@
          <a sec:authorize="!isAuthenticated()" class="dropdown-item" th:href="@{login}">login</a>
         <a sec:authorize="isAuthenticated()"   class="dropdown-item" th:href="@{logout}">logout</a>
 
-          <a class="dropdown-item" href="#">Profile</a>
       </div>
     </li>
   </ul>

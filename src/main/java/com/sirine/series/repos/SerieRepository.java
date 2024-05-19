@@ -10,7 +10,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import com.sirine.series.entities.Genre;
 import com.sirine.series.entities.Serie;
 
-@RepositoryRestResource(path = "rest")
 public interface SerieRepository extends JpaRepository<Serie, Long> {
 	
 	List<Serie> findByNomSerie(String nom);
